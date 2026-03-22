@@ -3,599 +3,725 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VileraNet — Gestão Disciplinar Escolar</title>
-  <meta name="description" content="Digitalize o controle disciplinar da sua escola. Registros em tempo real, relatórios automáticos, acesso por e-mail institucional."/>
+  <title>VileraNet — Plataforma de Ocorrências Escolares</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    /* ── Reset & Variables ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --navy: #002b5c;
-      --navy-mid: #001a35;
-      --navy-deep: #000d1a;
-      --teal: #1D9E75;
-      --teal-light: #5DCAA5;
-      --teal-pale: #E1F5EE;
-      --white: #ffffff;
-      --gray-100: #f4f6f9;
-      --gray-400: #9ca3af;
-      --gray-600: #4b5563;
-    }
-
     html { scroll-behavior: smooth; }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--navy-deep);
-      color: var(--white);
-      overflow-x: hidden;
+    :root {
+      --ink:    #050d1a;
+      --deep:   #091525;
+      --mid:    #0e2038;
+      --teal:   #00d4b4;
+      --teal2:  #00a896;
+      --white:  #f0f4ff;
+      --muted:  #7a8ca8;
+      --border: rgba(0,212,180,.13);
+      --radius: 16px;
+
+      /* Form field tokens */
+      --field-bg:      rgba(255,255,255,.05);
+      --field-border:  rgba(255,255,255,.1);
+      --field-focus:   rgba(0,212,180,.5);
+      --label-color:   #00d4b4;
+      --label-size:    0.72rem;
+      --label-weight:  600;
+      --input-color:   #f0f4ff;
+      --input-size:    0.95rem;
+      --placeholder:   rgba(122,140,168,.55);
     }
 
-    /* NAV */
+    body {
+      background: var(--ink);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── Subtle grid background ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,180,.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,180,.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    section, nav, footer { position: relative; z-index: 1; }
+
+    /* ── Navbar ── */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 68px;
+      padding: 0 clamp(1.5rem,5vw,5rem);
       display: flex; align-items: center; justify-content: space-between;
-      padding: 1.25rem 2rem;
-      background: rgba(0,13,26,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      backdrop-filter: blur(18px);
+      background: rgba(5,13,26,.88);
+      border-bottom: 1px solid var(--border);
     }
     .nav-logo {
-      display: flex; align-items: center; gap: 0.75rem;
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.1rem; color: var(--white);
-      text-decoration: none;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.25rem;
+      color: var(--white); text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+      letter-spacing: -.02em;
     }
-    .nav-logo img { width: 36px; height: 36px; object-fit: contain; }
-    .nav-cta {
-      background: var(--teal); color: var(--white);
-      padding: 0.6rem 1.4rem; border-radius: 99px;
-      font-size: 0.8rem; font-weight: 600;
-      text-decoration: none; letter-spacing: 0.05em;
-      transition: background 0.2s, transform 0.1s;
+    .nav-logo .dot {
+      width: 8px; height: 8px;
+      background: var(--teal); border-radius: 50%;
+      box-shadow: 0 0 10px var(--teal);
+      animation: pulse 2.2s ease-in-out infinite;
     }
-    .nav-cta:hover { background: var(--teal-light); transform: scale(1.03); }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
 
-    /* HERO */
-    .hero {
+    .nav-links { display: flex; align-items: center; gap: 2rem; }
+    .nav-links a {
+      font-size: .82rem; font-weight: 500; color: var(--muted);
+      text-decoration: none; letter-spacing: .03em; text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--teal); }
+    .btn-nav {
+      padding: .5rem 1.35rem;
+      background: var(--teal); color: var(--ink) !important;
+      border-radius: 100px; font-weight: 700 !important; font-size: .78rem !important;
+      transition: all .2s !important;
+    }
+    .btn-nav:hover { background: var(--teal2) !important; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,180,.3); }
+
+    @media(max-width:680px){ .nav-links { display: none; } }
+
+    /* ── Hero ── */
+    #hero {
       min-height: 100vh;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 8rem 1.5rem 4rem;
-      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px clamp(1.5rem,6vw,6rem) 80px;
+      overflow: hidden;
     }
-    .hero-bg {
-      position: absolute; inset: 0; z-index: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(29,158,117,0.18) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,43,92,0.5) 0%, transparent 60%);
+    .hero-glow {
+      position: absolute; width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(0,212,180,.1) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%,-62%);
+      pointer-events: none;
     }
-    .hero-grid {
-      position: absolute; inset: 0; z-index: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+    .tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: .38rem 1rem;
+      border: 1px solid var(--border); border-radius: 100px;
+      font-family: 'Space Mono', monospace; font-size: .68rem;
+      color: var(--teal); letter-spacing: .1em;
+      margin-bottom: 2rem;
+      animation: fadeUp .7s both;
     }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      background: rgba(29,158,117,0.15); border: 1px solid rgba(29,158,117,0.3);
-      color: var(--teal-light); padding: 0.4rem 1rem; border-radius: 99px;
-      font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em;
-      text-transform: uppercase; margin-bottom: 2rem; position: relative; z-index: 1;
-      animation: fadeUp 0.8s ease both;
-    }
-    .hero-badge-dot {
-      width: 6px; height: 6px; border-radius: 50%; background: var(--teal);
-      animation: pulse 2s ease infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+    .tag span { width: 6px; height: 6px; background: var(--teal); border-radius: 50%; }
 
-    .hero h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(2.4rem, 6vw, 4.2rem);
-      line-height: 1.1; letter-spacing: -0.02em;
-      max-width: 760px; position: relative; z-index: 1;
-      animation: fadeUp 0.8s ease 0.1s both;
+    h1 {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: clamp(2.6rem,7vw,5.5rem);
+      line-height: 1.02; letter-spacing: -.03em;
+      margin-bottom: 1.5rem;
+      animation: fadeUp .85s .08s both;
     }
-    .hero h1 em {
-      font-style: italic; color: var(--teal-light);
+    h1 .accent { color: var(--teal); }
+    h1 .ghost {
+      display: block;
+      -webkit-text-stroke: 1.5px rgba(240,244,255,.2);
+      color: transparent;
     }
     .hero-sub {
-      font-size: clamp(1rem, 2vw, 1.2rem); font-weight: 300;
-      color: rgba(255,255,255,0.55); max-width: 540px;
-      margin: 1.5rem auto 0; line-height: 1.7;
-      position: relative; z-index: 1;
-      animation: fadeUp 0.8s ease 0.2s both;
+      font-size: clamp(.95rem,2vw,1.15rem);
+      color: var(--muted); max-width: 520px;
+      margin: 0 auto 2.5rem;
+      animation: fadeUp 1s .16s both;
     }
-    .hero-actions {
-      display: flex; gap: 1rem; align-items: center; margin-top: 2.5rem;
-      position: relative; z-index: 1; flex-wrap: wrap; justify-content: center;
-      animation: fadeUp 0.8s ease 0.3s both;
+    .hero-cta {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+      animation: fadeUp 1s .24s both;
     }
     .btn-primary {
-      background: var(--teal); color: var(--white);
-      padding: 0.9rem 2rem; border-radius: 99px;
-      font-size: 0.9rem; font-weight: 600; letter-spacing: 0.04em;
-      text-decoration: none; transition: all 0.2s;
-      box-shadow: 0 0 32px rgba(29,158,117,0.35);
+      padding: .88rem 2.2rem;
+      background: var(--teal); color: var(--ink);
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: .9rem;
+      border-radius: 100px; border: none; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: .5rem;
+      transition: all .22s;
+      box-shadow: 0 0 36px rgba(0,212,180,.22);
+      letter-spacing: .02em;
     }
-    .btn-primary:hover { background: var(--teal-light); transform: translateY(-2px); box-shadow: 0 0 48px rgba(29,158,117,0.5); }
+    .btn-primary:hover { background: var(--teal2); transform: translateY(-2px); box-shadow: 0 10px 36px rgba(0,212,180,.38); }
     .btn-secondary {
-      color: rgba(255,255,255,0.6); font-size: 0.9rem; font-weight: 400;
-      text-decoration: none; display: flex; align-items: center; gap: 0.4rem;
-      transition: color 0.2s;
+      padding: .88rem 2.2rem;
+      background: transparent; color: var(--white);
+      font-family: 'Syne', sans-serif; font-weight: 600; font-size: .9rem;
+      border-radius: 100px; border: 1px solid var(--border);
+      cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: .5rem;
+      transition: all .22s;
     }
-    .btn-secondary:hover { color: var(--white); }
+    .btn-secondary:hover { border-color: var(--teal); color: var(--teal); transform: translateY(-2px); }
 
-    .hero-social {
-      margin-top: 1.5rem; color: rgba(255,255,255,0.3);
-      font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
-      position: relative; z-index: 1;
-      animation: fadeUp 0.8s ease 0.4s both;
+    .stats-bar {
+      display: flex; gap: clamp(2rem,4vw,4rem); justify-content: center; flex-wrap: wrap;
+      margin-top: 4rem; padding-top: 3rem; border-top: 1px solid var(--border);
+      animation: fadeUp 1s .4s both;
     }
-    .hero-social strong { color: rgba(255,255,255,0.6); }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--teal); }
+    .stat-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-top: .2rem; }
 
-    /* MOCKUP */
-    .mockup-wrap {
-      position: relative; z-index: 1; margin-top: 4rem; width: 100%; max-width: 900px;
-      animation: fadeUp 0.8s ease 0.5s both;
-    }
-    .mockup-glow {
-      position: absolute; inset: -40px;
-      background: radial-gradient(ellipse at 50% 60%, rgba(29,158,117,0.2) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .mockup {
-      width: 100%; border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.1);
-      overflow: hidden;
-      box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
-    }
-    .mockup-bar {
-      background: rgba(0,27,53,0.95); padding: 0.75rem 1rem;
-      display: flex; align-items: center; gap: 0.5rem;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .mockup-url {
-      flex: 1; background: rgba(255,255,255,0.06); border-radius: 6px;
-      padding: 0.3rem 0.75rem; font-size: 0.7rem; color: rgba(255,255,255,0.4);
-      text-align: center; margin: 0 0.5rem;
-    }
-    .mockup-screen {
-      background: #001428; padding: 1.5rem;
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;
-      min-height: 220px;
-    }
-    .mock-card {
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px; padding: 1rem;
-    }
-    .mock-card-label { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 0.5rem; }
-    .mock-card-value { font-family: 'DM Serif Display', serif; font-size: 1.8rem; color: var(--white); }
-    .mock-card-sub { font-size: 0.65rem; color: var(--teal-light); margin-top: 0.25rem; }
-    .mock-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.6rem; }
-    .mock-avatar { width: 24px; height: 24px; border-radius: 50%; background: rgba(29,158,117,0.3); flex-shrink: 0; }
-    .mock-line { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); flex: 1; }
-    .mock-badge {
-      font-size: 0.55rem; padding: 0.2rem 0.5rem; border-radius: 99px; font-weight: 600;
-    }
-    .mock-badge.pendente { background: rgba(251,191,36,0.15); color: #fbbf24; }
-    .mock-badge.resolvido { background: rgba(29,158,117,0.15); color: var(--teal-light); }
+    /* ── Section shared ── */
+    .section-wrap { padding: clamp(4rem,10vw,7rem) clamp(1.5rem,5vw,5rem); }
+    .section-head { text-align: center; margin-bottom: 3.5rem; }
+    .section-tag { font-family: 'Space Mono', monospace; font-size: .66rem; color: var(--teal); letter-spacing: .15em; text-transform: uppercase; margin-bottom: .8rem; }
+    h2 { font-family: 'Syne', sans-serif; font-size: clamp(1.7rem,4vw,2.8rem); font-weight: 800; line-height: 1.12; letter-spacing: -.02em; }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* STATS */
-    .stats {
-      display: flex; justify-content: center; gap: 0; flex-wrap: wrap;
-      border-top: 1px solid rgba(255,255,255,0.06);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      margin: 0; background: rgba(255,255,255,0.02);
-    }
-    .stat {
-      flex: 1; min-width: 160px; padding: 2rem 1.5rem; text-align: center;
-      border-right: 1px solid rgba(255,255,255,0.06);
-    }
-    .stat:last-child { border-right: none; }
-    .stat-num {
-      font-family: 'DM Serif Display', serif; font-size: 2.4rem;
-      color: var(--teal-light);
-    }
-    .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 0.25rem; letter-spacing: 0.05em; }
-
-    /* FEATURES */
-    .section { padding: 6rem 1.5rem; max-width: 1100px; margin: 0 auto; }
-    .section-tag {
-      display: inline-block; font-size: 0.7rem; font-weight: 600;
-      letter-spacing: 0.12em; text-transform: uppercase; color: var(--teal);
-      margin-bottom: 1rem;
-    }
-    .section-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.15;
-      letter-spacing: -0.02em; max-width: 560px;
-    }
-    .section-title em { font-style: italic; color: var(--teal-light); }
-
+    /* ── Features ── */
     .features-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem; margin-top: 3.5rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(270px,1fr));
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
+      max-width: 1080px; margin: 0 auto;
     }
     .feature-card {
-      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 16px; padding: 1.75rem;
-      transition: border-color 0.2s, background 0.2s;
+      background: var(--deep); padding: 2.4rem;
+      transition: background .28s; position: relative; overflow: hidden;
     }
-    .feature-card:hover {
-      border-color: rgba(29,158,117,0.3);
-      background: rgba(29,158,117,0.04);
+    .feature-card:hover { background: var(--mid); }
+    .feature-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg,rgba(0,212,180,.05) 0%,transparent 55%);
+      opacity: 0; transition: opacity .28s;
     }
-    .feature-icon {
-      width: 44px; height: 44px; border-radius: 12px;
-      background: rgba(29,158,117,0.12); border: 1px solid rgba(29,158,117,0.2);
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 1.25rem; font-size: 1.2rem;
+    .feature-card:hover::before { opacity: 1; }
+    .feat-icon {
+      width: 46px; height: 46px;
+      background: rgba(0,212,180,.08); border: 1px solid rgba(0,212,180,.18);
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; margin-bottom: 1.1rem;
     }
-    .feature-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
-    .feature-desc { font-size: 0.85rem; color: rgba(255,255,255,0.45); line-height: 1.65; }
+    .feat-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .98rem; margin-bottom: .5rem; }
+    .feat-desc { font-size: .86rem; color: var(--muted); line-height: 1.65; }
 
-    /* COMO FUNCIONA */
-    .steps { display: flex; flex-direction: column; gap: 0; margin-top: 3.5rem; }
+    /* ── Steps ── */
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 1.5rem; max-width: 860px; margin: 0 auto; counter-reset: step;
+    }
     .step {
-      display: flex; gap: 2rem; align-items: flex-start;
-      padding: 2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+      text-align: center; padding: 2rem 1.2rem; counter-increment: step;
+      background: var(--deep); border: 1px solid var(--border); border-radius: var(--radius);
     }
-    .step:last-child { border-bottom: none; }
-    .step-num {
-      font-family: 'DM Serif Display', serif; font-size: 3rem; color: rgba(255,255,255,0.08);
-      line-height: 1; flex-shrink: 0; width: 60px; text-align: right;
+    .step::before {
+      content: counter(step,decimal-leading-zero);
+      font-family: 'Space Mono', monospace; font-size: 2.5rem; font-weight: 700;
+      color: rgba(0,212,180,.12); display: block; margin-bottom: .4rem; line-height: 1;
     }
-    .step-content {}
-    .step-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.4rem; }
-    .step-desc { font-size: 0.85rem; color: rgba(255,255,255,0.45); line-height: 1.65; }
+    .step-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; margin-bottom: .45rem; }
+    .step-desc { font-size: .83rem; color: var(--muted); }
 
-    /* PREÇO */
-    .pricing-wrap {
-      display: flex; justify-content: center; margin-top: 3.5rem;
+    /* ── Video section ── */
+    .video-wrapper {
+      max-width: 940px; margin: 2.5rem auto 0;
+      border-radius: 18px; overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 32px 72px rgba(0,0,0,.55);
+      background: var(--deep); aspect-ratio: 16/9;
+      position: relative;
     }
-    .pricing-card {
-      background: linear-gradient(135deg, rgba(0,43,92,0.8) 0%, rgba(0,26,53,0.9) 100%);
-      border: 1px solid rgba(29,158,117,0.3);
-      border-radius: 24px; padding: 2.5rem; max-width: 460px; width: 100%;
+    .video-placeholder {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1rem;
+      color: var(--muted); cursor: pointer;
+      transition: background .2s;
+    }
+    .video-placeholder:hover { background: rgba(0,212,180,.03); }
+    .play-btn {
+      width: 68px; height: 68px; background: var(--teal);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 28px rgba(0,212,180,.4); transition: all .25s;
+    }
+    .play-btn:hover { transform: scale(1.08); background: var(--teal2); }
+    .play-btn svg { fill: var(--ink); margin-left: 4px; }
+    .play-label { font-size: .85rem; font-weight: 500; }
+    #demoVideo { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+    /* ══════════════════════════════════════════
+       CADASTRO / FORM  
+       All text rendered with crisp Inter — no uppercase transforms that cause distortion
+    ══════════════════════════════════════════ */
+    #cadastro { padding: clamp(4rem,10vw,7rem) clamp(1.5rem,5vw,5rem); }
+
+    .register-wrap {
+      max-width: 680px; margin: 0 auto;
+      background: var(--deep);
+      border: 1px solid var(--border); border-radius: 24px;
+      padding: clamp(2rem,5vw,3.5rem);
       position: relative; overflow: hidden;
-      box-shadow: 0 0 60px rgba(29,158,117,0.1);
     }
-    .pricing-glow {
-      position: absolute; top: -40px; right: -40px; width: 200px; height: 200px;
-      background: radial-gradient(circle, rgba(29,158,117,0.15) 0%, transparent 70%);
+    .register-wrap::before {
+      content: ''; position: absolute; top: -80px; right: -80px;
+      width: 340px; height: 340px;
+      background: radial-gradient(circle, rgba(0,212,180,.07) 0%, transparent 70%);
       pointer-events: none;
     }
-    .pricing-tag {
-      display: inline-block; background: rgba(29,158,117,0.2); color: var(--teal-light);
-      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-      padding: 0.3rem 0.75rem; border-radius: 99px; margin-bottom: 1.25rem;
-    }
-    .pricing-name { font-family: 'DM Serif Display', serif; font-size: 1.6rem; }
-    .pricing-price {
-      display: flex; align-items: baseline; gap: 0.25rem; margin: 1rem 0;
-    }
-    .pricing-currency { font-size: 1.2rem; color: rgba(255,255,255,0.5); }
-    .pricing-amount { font-family: 'DM Serif Display', serif; font-size: 4rem; line-height: 1; }
-    .pricing-period { font-size: 0.85rem; color: rgba(255,255,255,0.4); }
-    .pricing-trial {
-      font-size: 0.75rem; color: var(--teal-light); margin-bottom: 1.5rem;
-      padding: 0.5rem 0.75rem; background: rgba(29,158,117,0.1); border-radius: 8px;
-    }
-    .pricing-items { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
-    .pricing-item {
-      display: flex; align-items: center; gap: 0.75rem;
-      font-size: 0.85rem; color: rgba(255,255,255,0.7);
-    }
-    .pricing-check {
-      width: 18px; height: 18px; border-radius: 50%;
-      background: rgba(29,158,117,0.2); color: var(--teal-light);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.6rem; flex-shrink: 0;
-    }
-    .btn-pricing {
-      display: block; width: 100%; background: var(--teal);
-      color: var(--white); text-align: center; padding: 1rem;
-      border-radius: 99px; font-size: 0.9rem; font-weight: 600;
-      text-decoration: none; transition: all 0.2s;
-      box-shadow: 0 0 24px rgba(29,158,117,0.3);
-    }
-    .btn-pricing:hover { background: var(--teal-light); transform: translateY(-1px); }
-    .pricing-note { font-size: 0.7rem; color: rgba(255,255,255,0.25); text-align: center; margin-top: 1rem; }
 
-    /* DEPOIMENTO */
-    .testimonial-section { padding: 6rem 1.5rem; background: rgba(255,255,255,0.015); }
-    .testimonial-wrap { max-width: 700px; margin: 0 auto; text-align: center; }
-    .testimonial-quote {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(1.3rem, 3vw, 1.8rem);
-      line-height: 1.4; color: rgba(255,255,255,0.85);
-      font-style: italic; margin-bottom: 1.5rem;
+    .register-head { margin-bottom: 2rem; }
+    .register-head h2 { font-size: clamp(1.4rem,3vw,2rem); }
+    .register-head p {
+      color: var(--muted); font-size: .9rem; margin-top: .5rem;
+      font-weight: 400; /* normal weight — no distortion */
     }
-    .testimonial-author { font-size: 0.8rem; color: var(--teal-light); letter-spacing: 0.08em; }
-    .testimonial-school { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-top: 0.25rem; }
 
-    /* CTA FINAL */
-    .cta-section {
-      padding: 8rem 1.5rem; text-align: center;
-      background: linear-gradient(to bottom, transparent, rgba(0,43,92,0.2));
+    /* Form grid */
+    .form-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1.1rem; margin-bottom: 1.1rem;
     }
-    .cta-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.1;
-      letter-spacing: -0.02em; margin-bottom: 1.5rem;
-    }
-    .cta-title em { font-style: italic; color: var(--teal-light); }
-    .cta-sub { font-size: 1rem; color: rgba(255,255,255,0.4); margin-bottom: 2.5rem; }
+    @media(max-width:560px){ .form-grid { grid-template-columns: 1fr; } }
+    .col-full { grid-column: 1 / -1; }
 
-    /* FOOTER */
+    /* Field group */
+    .field {
+      display: flex; flex-direction: column; gap: .38rem;
+    }
+
+    /* Label — rendered with Inter, normal case, teal, small but readable */
+    .field label {
+      font-family: 'Inter', sans-serif;
+      font-size: var(--label-size);
+      font-weight: var(--label-weight);
+      color: var(--label-color);
+      letter-spacing: .04em;
+      text-transform: none; /* NO uppercase — prevents distortion */
+      user-select: none;
+    }
+
+    /* Inputs & selects */
+    .field input,
+    .field select,
+    .field textarea {
+      font-family: 'Inter', sans-serif;
+      font-size: var(--input-size);
+      font-weight: 400;
+      color: var(--input-color);
+      background: var(--field-bg);
+      border: 1px solid var(--field-border);
+      border-radius: 10px;
+      padding: .75rem 1rem;
+      outline: none;
+      width: 100%;
+      transition: border-color .18s, box-shadow .18s;
+      appearance: none;
+      -webkit-appearance: none;
+      line-height: 1.5;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder {
+      color: var(--placeholder);
+      font-weight: 400;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(0,212,180,.13);
+    }
+    .field select { cursor: pointer; }
+    .field select option { background: #0e2038; color: #f0f4ff; }
+    .field textarea { resize: vertical; min-height: 88px; }
+
+    /* Select arrow */
+    .field.has-select { position: relative; }
+    .field.has-select::after {
+      content: '▾';
+      position: absolute; right: 14px; bottom: 13px;
+      color: var(--muted); font-size: .75rem; pointer-events: none;
+    }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%; padding: 1rem;
+      background: var(--teal); color: var(--ink);
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: .98rem;
+      border: none; border-radius: 12px;
+      cursor: pointer; letter-spacing: .03em;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: all .22s; margin-top: .4rem;
+    }
+    .btn-submit:hover:not(:disabled) {
+      background: var(--teal2); transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(0,212,180,.32);
+    }
+    .btn-submit:disabled { opacity: .55; cursor: wait; }
+
+    /* Form note */
+    .form-note {
+      text-align: center; font-size: .78rem; color: var(--muted);
+      margin-top: .9rem; display: flex; align-items: center;
+      justify-content: center; gap: .4rem; font-weight: 400;
+    }
+
+    /* Toast */
+    .toast {
+      display: none; padding: 1rem 1.3rem;
+      border-radius: 12px; margin-bottom: 1.4rem;
+      font-size: .88rem; font-weight: 500; border: 1px solid;
+    }
+    .toast.ok   { background: rgba(0,212,180,.08); border-color: rgba(0,212,180,.28); color: var(--teal); }
+    .toast.err  { background: rgba(255,80,80,.07); border-color: rgba(255,80,80,.2); color: #ff7070; }
+    .toast.show { display: block; animation: fadeUp .35s; }
+
+    /* ── Footer ── */
     footer {
-      border-top: 1px solid rgba(255,255,255,0.06);
-      padding: 2rem 1.5rem; text-align: center;
-      font-size: 0.75rem; color: rgba(255,255,255,0.2);
+      padding: 2.5rem clamp(1.5rem,5vw,5rem);
+      border-top: 1px solid var(--border); text-align: center;
     }
+    .footer-logo {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 1.3rem; margin-bottom: .6rem; letter-spacing: -.02em;
+    }
+    .footer-logo span { color: var(--teal); }
+    footer p { font-size: .78rem; color: var(--muted); font-weight: 400; }
 
-    /* RESPONSIVE */
-    @media (max-width: 640px) {
-      .mockup-screen { grid-template-columns: 1fr; }
-      .stats { flex-direction: column; }
-      .stat { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
-      .step { flex-direction: column; gap: 0.75rem; }
-      .step-num { width: auto; text-align: left; font-size: 2rem; }
-      nav { padding: 1rem; }
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: none; }
     }
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .65s ease, transform .65s ease; }
+    .reveal.in-view { opacity: 1; transform: none; }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
+<!-- ═══ NAVBAR ═══ -->
 <nav>
   <a href="#" class="nav-logo">
-    <img src="/logo.png" alt="Logo" onerror="this.style.display='none'"/>
+    <div class="dot"></div>
     VileraNet
   </a>
-  <a href="#cadastro" class="nav-cta">Cadastrar escola</a>
+  <div class="nav-links">
+    <a href="#features">Recursos</a>
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#demo">Demonstração</a>
+    <a href="#cadastro" class="btn-nav">Solicitar Acesso</a>
+  </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
-
-  <div class="hero-badge">
-    <span class="hero-badge-dot"></span>
-    Novo · Gestão disciplinar digital
-  </div>
-
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div class="tag"><span></span>Sistema de Gestão de Ocorrências Escolares</div>
   <h1>
-    O fim da pasta de<br/>
-    ocorrências em <em>papel</em>
+    Controle total das<br>ocorrências <span class="accent">escolares</span>
+    <span class="ghost">em tempo real</span>
   </h1>
-
   <p class="hero-sub">
-    Registros disciplinares em tempo real, relatórios automáticos em PDF e acesso seguro pelo e-mail institucional de cada professor.
+    VileraNet centraliza, organiza e acompanha cada registro de ocorrência da sua escola — com relatórios automáticos, acesso por perfil e total segurança dos dados.
   </p>
-
-  <div class="hero-actions">
-    <a href="#cadastro" class="btn-primary">Começar grátis por 15 dias →</a>
-    <a href="#como-funciona" class="btn-secondary">Ver como funciona ↓</a>
+  <div class="hero-cta">
+    <a href="#cadastro" class="btn-primary">✦ Quero contratar</a>
+    <a href="#demo" class="btn-secondary">▶ Ver demonstração</a>
   </div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Web — sem instalação</div></div>
+    <div class="stat"><div class="stat-num">3 perfis</div><div class="stat-label">Gestor · Professor · Admin</div></div>
+    <div class="stat"><div class="stat-num">PDF</div><div class="stat-label">Relatórios automáticos</div></div>
+    <div class="stat"><div class="stat-num">LGPD</div><div class="stat-label">Dados protegidos</div></div>
+  </div>
+</section>
 
-  <p class="hero-social">
-    Desenvolvido pela <strong>VileraNet</strong>
-  </p>
-
-  <!-- MOCKUP -->
-  <div class="mockup-wrap">
-    <div class="mockup-glow"></div>
-    <div class="mockup">
-      <div class="mockup-bar">
-        <div class="mockup-dot" style="background:#ff5f57"></div>
-        <div class="mockup-dot" style="background:#ffbd2e"></div>
-        <div class="mockup-dot" style="background:#28c840"></div>
-        <div class="mockup-url">cadastroslkm.vercel.app · Gestão 2026</div>
-      </div>
-      <div class="mockup-screen">
-        <div class="mock-card">
-          <div class="mock-card-label">Ocorrências hoje</div>
-          <div class="mock-card-value">12</div>
-          <div class="mock-card-sub">↑ 3 novas nas últimas 2h</div>
-          <div style="margin-top:0.75rem">
-            <div class="mock-row"><div class="mock-avatar"></div><div class="mock-line"></div><div class="mock-badge pendente">Pendente</div></div>
-            <div class="mock-row"><div class="mock-avatar"></div><div class="mock-line"></div><div class="mock-badge resolvido">Resolvido</div></div>
-            <div class="mock-row"><div class="mock-avatar"></div><div class="mock-line"></div><div class="mock-badge pendente">Pendente</div></div>
-          </div>
-        </div>
-        <div class="mock-card">
-          <div class="mock-card-label">Professores ativos</div>
-          <div class="mock-card-value">47</div>
-          <div class="mock-card-sub">de 100 disponíveis</div>
-          <div style="margin-top:0.75rem; background:rgba(255,255,255,0.04); border-radius:8px; overflow:hidden; height:8px;">
-            <div style="width:47%; height:100%; background:var(--teal); border-radius:8px;"></div>
-          </div>
-          <div style="margin-top:0.75rem">
-            <div class="mock-row"><div class="mock-avatar"></div><div class="mock-line"></div></div>
-            <div class="mock-row"><div class="mock-avatar"></div><div class="mock-line"></div></div>
-          </div>
-        </div>
-        <div class="mock-card">
-          <div class="mock-card-label">PDFs gerados</div>
-          <div class="mock-card-value">238</div>
-          <div class="mock-card-sub">este mês</div>
-          <div style="margin-top:0.75rem; display:flex; gap:4px; align-items:flex-end; height:40px;">
-            <div style="flex:1; background:rgba(29,158,117,0.2); border-radius:4px; height:30%"></div>
-            <div style="flex:1; background:rgba(29,158,117,0.3); border-radius:4px; height:50%"></div>
-            <div style="flex:1; background:rgba(29,158,117,0.4); border-radius:4px; height:40%"></div>
-            <div style="flex:1; background:rgba(29,158,117,0.5); border-radius:4px; height:70%"></div>
-            <div style="flex:1; background:rgba(29,158,117,0.6); border-radius:4px; height:60%"></div>
-            <div style="flex:1; background:var(--teal); border-radius:4px; height:100%"></div>
-          </div>
-        </div>
-      </div>
+<!-- ═══ FEATURES ═══ -->
+<section id="features" class="section-wrap">
+  <div class="section-head reveal">
+    <div class="section-tag">// Recursos</div>
+    <h2>Tudo que sua escola precisa,<br>em um só lugar</h2>
+  </div>
+  <div class="features-grid reveal">
+    <div class="feature-card">
+      <div class="feat-icon">📋</div>
+      <div class="feat-title">Registro de Ocorrências</div>
+      <p class="feat-desc">Formulário intuitivo para registrar qualquer tipo de ocorrência com data, aluno, turma e descrição detalhada.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">👥</div>
+      <div class="feat-title">Multi-perfil de Acesso</div>
+      <p class="feat-desc">Gestores têm visão completa. Professores acessam apenas suas turmas. Login seguro com e-mail institucional.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Dashboard em Tempo Real</div>
+      <p class="feat-desc">Gráficos, filtros e indicadores que mostram histórico e tendências de ocorrências por turma, aluno ou tipo.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📄</div>
+      <div class="feat-title">PDF Automático</div>
+      <p class="feat-desc">Relatórios formais com um clique, prontos para arquivamento ou comunicação com as famílias.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🔍</div>
+      <div class="feat-title">Busca e Histórico</div>
+      <p class="feat-desc">Encontre qualquer ocorrência em segundos por aluno, turma, data ou palavra-chave.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🛡️</div>
+      <div class="feat-title">Segurança e LGPD</div>
+      <p class="feat-desc">Dados protegidos com autenticação robusta. Cada escola acessa apenas seus próprios registros.</p>
     </div>
   </div>
 </section>
 
-<!-- STATS -->
-<div class="stats">
-  <div class="stat">
-    <div class="stat-num">100%</div>
-    <div class="stat-label">Digital, sem papel</div>
+<!-- ═══ HOW IT WORKS ═══ -->
+<section id="como-funciona" class="section-wrap" style="background:linear-gradient(180deg,transparent,rgba(0,212,180,.025),transparent)">
+  <div class="section-head reveal">
+    <div class="section-tag">// Como funciona</div>
+    <h2>Do cadastro à gestão<br>em 3 passos</h2>
   </div>
-  <div class="stat">
-    <div class="stat-num">30s</div>
-    <div class="stat-label">Para registrar uma ocorrência</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">PDF</div>
-    <div class="stat-label">Gerado automaticamente</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">R$199</div>
-    <div class="stat-label">Por mês, escola inteira</div>
-  </div>
-</div>
-
-<!-- FEATURES -->
-<div style="max-width:1100px; margin:0 auto; padding:6rem 1.5rem">
-  <div class="section-tag">Funcionalidades</div>
-  <h2 class="section-title">Tudo que sua escola precisa, <em>num só lugar</em></h2>
-
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">📋</div>
-      <div class="feature-title">Registro em tempo real</div>
-      <div class="feature-desc">O professor registra a ocorrência pelo celular ou computador. A gestão vê na hora, sem precisar esperar o papel chegar.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📄</div>
-      <div class="feature-title">PDF automático</div>
-      <div class="feature-desc">Cada registro gera automaticamente um relatório em PDF formal, pronto para arquivar ou enviar para os responsáveis.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔐</div>
-      <div class="feature-title">Acesso por e-mail institucional</div>
-      <div class="feature-desc">Professores entram com o e-mail da Secretaria de Educação. Sem cadastro manual — só quem é da escola acessa.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📊</div>
-      <div class="feature-title">Dashboard da gestão</div>
-      <div class="feature-desc">A direção vê todos os registros, filtra por turma, disciplina ou professor, e acompanha o status de cada ocorrência.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔍</div>
-      <div class="feature-title">Histórico por aluno</div>
-      <div class="feature-desc">Pesquise pelo nome ou RA do aluno e veja todo o histórico disciplinar, com datas, professores e medidas tomadas.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🚀</div>
-      <div class="feature-title">App integrado à plataforma</div>
-      <div class="feature-desc">Instale o app direto no celular sem precisar de loja de aplicativos. Acesso rápido, notificações e funcionamento mesmo com internet instável.</div>
-    </div>
-  </div>
-</div>
-
-<!-- COMO FUNCIONA -->
-<div style="max-width:1100px; margin:0 auto; padding:0 1.5rem 6rem" id="como-funciona">
-  <div class="section-tag">Como funciona</div>
-  <h2 class="section-title">Do cadastro ao primeiro registro <em>em minutos</em></h2>
-
-  <div class="steps">
+  <div class="steps reveal">
     <div class="step">
-      <div class="step-num">01</div>
-      <div class="step-content">
-        <div class="step-title">Cadastre sua escola</div>
-        <div class="step-desc">Preencha o formulário com o nome da escola e o domínio do e-mail institucional. O processo leva menos de 2 minutos e você tem 15 dias grátis para testar.</div>
-      </div>
+      <div class="step-title">Sua escola se cadastra</div>
+      <p class="step-desc">Preencha o formulário. Nossa equipe ativa a plataforma personalizada para sua escola em até 48h.</p>
     </div>
     <div class="step">
-      <div class="step-num">02</div>
-      <div class="step-content">
-        <div class="step-title">Adicione os professores</div>
-        <div class="step-desc">No painel da gestão, adicione os e-mails dos professores autorizados. Eles recebem acesso imediatamente e podem criar a própria senha.</div>
-      </div>
+      <div class="step-title">Professores recebem acesso</div>
+      <p class="step-desc">A gestão cadastra os professores com e-mail institucional. Cada um vê apenas suas turmas.</p>
     </div>
     <div class="step">
-      <div class="step-num">03</div>
-      <div class="step-content">
-        <div class="step-title">Professores registram ocorrências</div>
-        <div class="step-desc">Cada professor acessa pelo e-mail institucional, seleciona o aluno e descreve a ocorrência. O PDF é gerado automaticamente.</div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">04</div>
-      <div class="step-content">
-        <div class="step-title">Gestão acompanha tudo em tempo real</div>
-        <div class="step-desc">A direção vê todos os registros, atualiza o status, deixa feedback e tem acesso ao histórico completo de cada aluno a qualquer momento.</div>
-      </div>
+      <div class="step-title">Registros e relatórios</div>
+      <p class="step-desc">Ocorrências registradas, acompanhadas e exportadas em PDF — tudo centralizado e auditável.</p>
     </div>
   </div>
-</div>
+</section>
 
-<!-- PREÇO -->
-<div style="max-width:1100px; margin:0 auto; padding:0 1.5rem 6rem" id="cadastro">
-  <div class="section-tag">Plano</div>
-  <h2 class="section-title">Um plano simples, <em>sem surpresas</em></h2>
-
-  <div class="pricing-wrap">
-    <div class="pricing-card">
-      <div class="pricing-glow"></div>
-      <div class="pricing-tag">Plano Básico</div>
-      <div class="pricing-name">Tudo incluso</div>
-      <div class="pricing-price">
-        <span class="pricing-currency">R$</span>
-        <span class="pricing-amount">199</span>
-        <span class="pricing-period">/mês por escola</span>
+<!-- ═══ DEMO VIDEO ═══ -->
+<section id="demo" class="section-wrap">
+  <div class="section-head reveal">
+    <div class="section-tag">// Demonstração</div>
+    <h2>Veja a plataforma<br>em funcionamento</h2>
+  </div>
+  <div class="video-wrapper reveal">
+    <div class="video-placeholder" id="videoPlaceholder"
+         onclick="this.style.display='none';
+                  document.getElementById('demoVideo').style.display='block';
+                  document.getElementById('demoVideo').play()">
+      <div class="play-btn">
+        <svg width="26" height="26" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
       </div>
-      <div class="pricing-trial">
-        15 dias grátis para testar · sem cartão de crédito
-      </div>
-      <ul class="pricing-items">
-        <li class="pricing-item"><span class="pricing-check">✓</span> Até 100 professores</li>
-        <li class="pricing-item"><span class="pricing-check">✓</span> Registros ilimitados</li>
-        <li class="pricing-item"><span class="pricing-check">✓</span> PDFs automáticos</li>
-        <li class="pricing-item"><span class="pricing-check">✓</span> Histórico completo por aluno</li>
-        <li class="pricing-item"><span class="pricing-check">✓</span> Dashboard analytics</li>
-        <li class="pricing-item"><span class="pricing-check">✓</span> Acesso por e-mail institucional</li>
-        <li class="pricing-item"><span class="pricing-check">✓</span> Suporte por WhatsApp</li>
-      </ul>
-      <a href="/cadastro" class="btn-pricing">Começar 15 dias grátis →</a>
-      <p class="pricing-note">PIX · Boleto · Cartão de crédito · Cancele quando quiser</p>
+      <span class="play-label">Clique para assistir a demonstração completa</span>
     </div>
+    <video id="demoVideo" controls>
+      <source src="video_demo_editado.mp4" type="video/mp4">
+      Seu navegador não suporta vídeo HTML5.
+    </video>
   </div>
-</div>
+</section>
 
-<!-- DEPOIMENTO -->
-<div class="testimonial-section">
-  <div class="testimonial-wrap">
-    <div class="section-tag" style="display:block; margin-bottom:1.5rem">Quem usa</div>
-    <p class="testimonial-quote">
-      "Acabou a pasta de ocorrências. Agora tudo é digital, o professor registra na hora e eu acompanho pelo celular mesmo fora da escola."
-    </p>
-    <div class="testimonial-author">Gestão Escolar</div>
-    <div class="testimonial-school">Escola da rede pública</div>
-  </div>
-</div>
+<!-- ═══ CADASTRO ═══ -->
+<section id="cadastro">
+  <div class="register-wrap reveal">
 
-<!-- CTA FINAL -->
-<div class="cta-section">
-  <h2 class="cta-title">Sua escola pode ser a<br/><em>próxima a digitalizar</em></h2>
-  <p class="cta-sub">15 dias grátis. Sem burocracia. Funciona no celular.</p>
-  <a href="/cadastro" class="btn-primary" style="display:inline-block; font-size:1rem; padding:1rem 2.5rem;">
-    Cadastrar minha escola →
-  </a>
-</div>
+    <div class="register-head">
+      <div class="section-tag" style="text-align:left">// Solicitar Acesso</div>
+      <h2>Leve o VileraNet<br>para sua escola</h2>
+      <p>Preencha os dados abaixo. Nossa equipe entrará em contato em até 24 horas úteis.</p>
+    </div>
 
-<!-- FOOTER -->
+    <div class="toast" id="toast"></div>
+
+    <div class="form-grid">
+
+      <div class="field">
+        <label for="nomeEscola">Nome da escola *</label>
+        <input id="nomeEscola" type="text" placeholder="EE Exemplo de Escola" required>
+      </div>
+
+      <div class="field">
+        <label for="codigoInep">Código INEP / CIE</label>
+        <input id="codigoInep" type="text" placeholder="Opcional">
+      </div>
+
+      <div class="field">
+        <label for="cidade">Cidade *</label>
+        <input id="cidade" type="text" placeholder="São Paulo" required>
+      </div>
+
+      <div class="field has-select">
+        <label for="estado">Estado *</label>
+        <select id="estado" required>
+          <option value="">Selecione...</option>
+          <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+          <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+          <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+          <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+          <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+          <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+          <option selected>SP</option><option>SE</option><option>TO</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="nomeResponsavel">Nome do responsável *</label>
+        <input id="nomeResponsavel" type="text" placeholder="Nome completo" required>
+      </div>
+
+      <div class="field has-select">
+        <label for="cargo">Cargo *</label>
+        <select id="cargo" required>
+          <option value="">Selecione...</option>
+          <option>Diretor(a)</option>
+          <option>Vice-Diretor(a)</option>
+          <option>Coordenador(a) Pedagógico</option>
+          <option>Secretário(a) Escolar</option>
+          <option>Outro</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="emailInstitucional">E-mail institucional *</label>
+        <input id="emailInstitucional" type="email" placeholder="gestao@escola.edu.br" required>
+      </div>
+
+      <div class="field">
+        <label for="telefone">Telefone / WhatsApp *</label>
+        <input id="telefone" type="tel" placeholder="(11) 99999-9999" required>
+      </div>
+
+      <div class="field has-select">
+        <label for="numProfessores">Número aproximado de professores</label>
+        <select id="numProfessores">
+          <option value="">Selecione...</option>
+          <option>Até 10</option>
+          <option>11 a 30</option>
+          <option>31 a 60</option>
+          <option>Mais de 60</option>
+        </select>
+      </div>
+
+      <div class="field has-select">
+        <label for="origemContato">Como conheceu o VileraNet?</label>
+        <select id="origemContato">
+          <option value="">Selecione...</option>
+          <option>Indicação de colega</option>
+          <option>Redes sociais</option>
+          <option>Busca no Google</option>
+          <option>Evento / Palestra</option>
+          <option>Outro</option>
+        </select>
+      </div>
+
+      <div class="field col-full">
+        <label for="mensagem">Mensagem / dúvidas (opcional)</label>
+        <textarea id="mensagem" placeholder="Conte-nos mais sobre as necessidades da sua escola..."></textarea>
+      </div>
+
+    </div><!-- /form-grid -->
+
+    <button class="btn-submit" id="btnSubmit" onclick="submitForm()">
+      <span id="btnText">✦ Solicitar Acesso</span>
+    </button>
+    <p class="form-note">🔒 Seus dados são protegidos e não serão compartilhados com terceiros.</p>
+
+  </div><!-- /register-wrap -->
+</section>
+
+<!-- ═══ FOOTER ═══ -->
 <footer>
-  <p>VileraNet · Portal de Gestão Escolar</p>
-  <p style="margin-top:0.5rem"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" d
+  <div class="footer-logo">Vilera<span>Net</span></div>
+  <p>Plataforma de Ocorrências Escolares · Para a rede pública de ensino</p>
+  <p style="margin-top:.4rem">© 2026 VileraNet · Todos os direitos reservados</p>
+</footer>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+  // ── Scroll reveal
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); } });
+  }, { threshold: .1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ── Google Sheets via Apps Script
+  const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+  const SHEET_ID = '1lRxhG_P2V4ZLDHJwZ88sgVkiod3gEN7xZNRO6Owbnk0';
+
+  function toast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `toast ${type} show`;
+    t.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    setTimeout(() => t.className = 'toast', 7000);
+  }
+  const val = id => (document.getElementById(id)?.value?.trim() || '');
+
+  async function submitForm() {
+    const d = {
+      nomeEscola: val('nomeEscola'), codigoInep: val('codigoInep'),
+      cidade: val('cidade'), estado: val('estado'),
+      nomeResponsavel: val('nomeResponsavel'), cargo: val('cargo'),
+      emailInstitucional: val('emailInstitucional'), telefone: val('telefone'),
+      numProfessores: val('numProfessores'), origemContato: val('origemContato'),
+      mensagem: val('mensagem'),
+    };
+    const required = ['nomeEscola','cidade','estado','nomeResponsavel','cargo','emailInstitucional','telefone'];
+    for(const k of required) {
+      if(!d[k]){ toast('⚠️ Preencha todos os campos obrigatórios (*).','err'); return; }
+    }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.emailInstitucional)){
+      toast('⚠️ Informe um e-mail válido.','err'); return;
+    }
+    const btn = document.getElementById('btnSubmit');
+    const txt = document.getElementById('btnText');
+    btn.disabled = true; txt.textContent = 'Enviando…';
+    try {
+      if(APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+        const leads = JSON.parse(localStorage.getItem('vileranet_leads') || '[]');
+        leads.push({ ...d, timestamp: new Date().toISOString() });
+        localStorage.setItem('vileranet_leads', JSON.stringify(leads));
+        console.log('Lead salvo localmente:', d);
+        toast('✅ Solicitação recebida! Entraremos em contato em breve.','ok');
+        resetForm();
+      } else {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sheetId: SHEET_ID, timestamp: new Date().toLocaleString('pt-BR'), ...d }),
+          mode: 'no-cors'
+        });
+        toast('✅ Solicitação enviada! Retorno em até 24 horas úteis.','ok');
+        resetForm();
+      }
+    } catch(e) {
+      console.error(e);
+      toast('❌ Erro ao enviar. Tente novamente.','err');
+    } finally {
+      btn.disabled = false; txt.textContent = '✦ Solicitar Acesso';
+    }
+  }
+
+  function resetForm() {
+    ['nomeEscola','codigoInep','cidade','nomeResponsavel','emailInstitucional','telefone','mensagem']
+      .forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    ['estado','cargo','numProfessores','origemContato']
+      .forEach(id => { const el = document.getElementById(id); if(el) el.selectedIndex=0; });
+  }
+
+  // ── Phone mask
+  document.getElementById('telefone').addEventListener('input', function(){
+    let v = this.value.replace(/\D/g,'').slice(0,11);
+    if(v.length>=11)      v = v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+    else if(v.length>=7)  v = v.replace(/(\d{2})(\d{4})(\d+)/,'($1) $2-$3');
+    else if(v.length>=3)  v = v.replace(/(\d{2})(\d+)/,'($1) $2');
+    this.value = v;
+  });
+</script>
+</body>
+</html>
