@@ -97,6 +97,50 @@
     }
     .btn-nav:hover { background: var(--teal2) !important; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,180,.3); }
 
+    /* Premium Platform Button */
+    .btn-platform {
+      padding: .55rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--white) !important;
+      border-radius: 100px;
+      font-weight: 800 !important;
+      font-size: .75rem !important;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      border: 1px solid rgba(0, 212, 180, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-platform::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: 0.5s;
+    }
+    .btn-platform:hover {
+      background: rgba(0, 212, 180, 0.1);
+      border-color: var(--teal);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0, 212, 180, 0.2);
+    }
+    .btn-platform:hover::before {
+      left: 100%;
+    }
+    .btn-platform svg {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s;
+    }
+    .btn-platform:hover svg {
+      transform: translateX(3px);
+    }
+
     @media(max-width:680px){ .nav-links { display: none; } }
 
     /* ── Hero ── */
@@ -415,6 +459,10 @@
     <a href="#features">Recursos</a>
     <a href="#como-funciona">Como funciona</a>
     <a href="#demo">Demonstração</a>
+    <a href="https://psicossocialempresas.vercel.app" class="btn-platform" target="_blank">
+      Acessar Plataforma
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+    </a>
     <a href="#cadastro" class="btn-nav">Solicitar Acesso</a>
   </div>
 </nav>
